@@ -6,3 +6,4 @@ consul/*
 *.delete
 *.root_token
 *.txt
+*.jwt
