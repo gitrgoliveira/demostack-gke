@@ -9,6 +9,19 @@ function c3_kctx {
     kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-3)
 }
 
+function vault1_ctx {
+    c1_kctx 1>/dev/null
+    export VAULT_SKIP_VERIFY=1
+    export VAULT_ADDR=https://$(kubectl get svc vault-active -o jsonpath={..ip} --allow-missing-template-keys=false):8200
+    export VAULT_TOKEN=$(cat cluster-1.root_token)
+}
+function vault2_ctx {
+    c2_kctx 1>/dev/null
+    export VAULT_SKIP_VERIFY=1
+    export VAULT_ADDR=https://$(kubectl get svc vault-active -o jsonpath={..ip} --allow-missing-template-keys=false):8200
+    export VAULT_TOKEN=$(cat cluster-2.root_token)
+}
+
 function c1_kctl {
     c1_kctx 1>/dev/null
     kubectl $*
@@ -21,7 +34,6 @@ function c3_kctl {
     c3_kctx 1>/dev/null
     kubectl $*
 }
-
 
 function setup-consul {
     kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-1)

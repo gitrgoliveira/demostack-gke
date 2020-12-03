@@ -7,7 +7,7 @@ set -o pipefail
 vault1_ctx
 vault write -force  sys/replication/performance/primary/disable || true
 sleep 2
-vault write sys/replication/performance/primary/enable primary_cluster_addr=https://127.0.0.1:8221
+vault write sys/replication/performance/primary/enable primary_cluster_addr=https://$(kubectl get svc vault-active -o jsonpath={..ip} --allow-missing-template-keys=false):8201
 sleep 2
 
 export VAULT_ADDR=https://$(kubectl get svc vault-active -o jsonpath={..ip} --allow-missing-template-keys=false):8200
