@@ -1,0 +1,8 @@
+.DS_Store
+.terraform/*
+vault/*
+consul/*
+*.pem
+*.delete
+*.root_token
+*.txt
