@@ -3,7 +3,9 @@
 This repo aims to allow testing of Vault and Consul Enterprise and OSS features, using k8s clusters managed by GCP (GKE).
 
 ## Cloud Requirements
-A GCP account with a DNS hosted zone.
+A GCP account, project and a DNS hosted zone.
+I've created my hosted zone using https://github.com/lhaig/dns-multicloud?ref=v1.1
+
 ## Client Requirements
 The following cli's must be installed:
  - gcloud
