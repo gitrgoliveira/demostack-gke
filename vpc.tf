@@ -5,7 +5,7 @@ provider "google" {
 
 # VPC
 resource "google_compute_network" "vpc" {
-  name                    = "${var.project}-vpc"
+  name                    = "${var.project}-gke-vpc"
   auto_create_subnetworks = "false"
 }
 
