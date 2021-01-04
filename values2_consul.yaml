@@ -1,0 +1,107 @@
+global:
+  name: consul
+  image: hashicorp/consul-enterprise:1.9.1-ent
+  datacenter: cluster-2
+  enableConsulNamespaces: true
+  gossipEncryption:
+    secretName: consul-gossipencryptionkey
+    secretKey: key
+  federation:
+    enabled: true
+  tls:
+    enabled: true
+    enableAutoEncrypt: true
+    verify: false
+    serverAdditionalDNSSANs: ["consul-cluster-2.ric.gcp.hashidemos.io"]
+    caCert:
+      secretName: consul-federation
+      secretKey: caCert
+    caKey:
+      secretName: consul-federation
+      secretKey: caKey
+  acls:
+    manageSystemACLs: true
+    replicationToken:
+      secretName: consul-acl-replication-acl-token
+      secretKey: token
+server:
+  extraVolumes:
+  - type: secret
+    name: consul-federation
+    items:
+      - key: serverConfigJSON
+        path: config.json
+    load: true
+  extraConfig: |
+    {
+      "log_level": "INFO",
+      "dns_config": {
+        "service_ttl": {
+          "*": "1s"
+        },
+        "node_ttl": "1s"
+      },
+      "audit" : {
+        "enabled": true,
+        "sink" : {
+          "a_sink" : {
+            "type"   :"file",
+            "format" : "json",
+            "path"   : "/consul/data/audit/log.json",
+            "delivery_guarantee" : "best-effort",
+            "rotate_duration" : "24h",
+            "rotate_max_files" : 15,
+            "rotate_bytes" : 25165824
+          }
+        }
+      }
+    }
+
+connectInject:
+  enabled: true
+  aclInjectToken:
+    secretName: consul-connect-inject-acl-token
+    secretKey: token
+  consulNamespaces:
+    mirroringK8S: true
+  centralConfig:
+    enabled: true
+    defaultProtocol: 'http'
+    proxyDefaults: |
+      {
+        "envoy_prometheus_bind_addr": "0.0.0.0:9102"
+      }
+
+controller:
+  enabled: true
+ui:
+  service:
+    type: LoadBalancer
+    annotations: |
+      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-2.ric.gcp.hashidemos.io."
+meshGateway:
+  enabled: true
+  wanAddress:
+    source: Service
+  service:
+    type: LoadBalancer
+
+ingressGateways:
+  enabled: true
+  defaults:
+    service:
+      type: LoadBalancer
+      ports:
+        - port: 443
+  gateways:
+    - name: dashboard-ingress-gateway
+      service:
+        annotations: |
+          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-2.ric.gcp.hashidemos.io"
+    - name: webapp-ingress-gateway
+      service:
+        annotations: |
+          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-2.ric.gcp.hashidemos.io"
+
+terminatingGateways:
+  enabled: false

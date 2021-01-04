@@ -1,0 +1,98 @@
+global:
+  name: consul
+  image: hashicorp/consul-enterprise:1.9.1-ent
+  datacenter: cluster-1
+  enableConsulNamespaces: true
+  gossipEncryption:
+    secretName: consul-gossipencryptionkey
+    secretKey: key
+  federation:
+    enabled: true
+    createFederationSecret: true
+  tls:
+    enabled: true
+    enableAutoEncrypt: true
+    verify: false
+    serverAdditionalDNSSANs: ["consul-cluster-1.ric.gcp.hashidemos.io"]
+  acls:
+    manageSystemACLs: true
+    createReplicationToken: true
+server:
+  extraConfig: |
+    {
+      "log_level": "INFO",
+      "dns_config": {
+        "service_ttl": {
+          "*": "1s"
+        },
+        "node_ttl": "1s"
+      },
+      "audit" : {
+        "enabled": true,
+        "sink" : {
+          "a_sink" : {
+            "type"   :"file",
+            "format" : "json",
+            "path"   : "/consul/data/audit/log.json",
+            "delivery_guarantee" : "best-effort",
+            "rotate_duration" : "24h",
+            "rotate_max_files" : 15,
+            "rotate_bytes" : 25165824
+          }
+        }
+      }
+    }
+connectInject:
+  enabled: true
+  aclInjectToken:
+    secretName: consul-connect-inject-acl-token
+    secretKey: token
+  consulNamespaces:
+    mirroringK8S: true
+  # envoyExtraArgs: -admin-access-log-path="/var/log/envoy-access.log"
+
+  centralConfig:
+    enabled: true
+    defaultProtocol: 'http'
+    proxyDefaults: |
+      {
+        "envoy_prometheus_bind_addr": "0.0.0.0:9102",
+        "envoy_extra_static_clusters_json": "{\"connect_timeout\": \"3.000s\", \"dns_lookup_family\": \"V4_ONLY\", \"lb_policy\": \"ROUND_ROBIN\", \"load_assignment\": { \"cluster_name\": \"zipkin\", \"endpoints\": [ { \"lb_endpoints\": [ { \"endpoint\": { \"address\": { \"socket_address\": { \"address\": \"zipkin.default\", \"port_value\": 9411, \"protocol\": \"TCP\" } } } } ] } ] }, \"name\": \"zipkin\", \"type\": \"STRICT_DNS\" }",
+        "envoy_tracing_json":"{ \"http\": { \"config\": { \"collector_cluster\": \"zipkin\", \"collector_endpoint\": \"/api/v2/spans\"}, \"name\": \"envoy.tracers.zipkin\" }}",
+        "envoy_public_listener_json" : "{ \"name\": \"local_agent\", \"address\": { \"socket_address\": { \"address\": \"0.0.0.0\", \"port_value\": 20002 } }, \"filter_chains\": [ { \"filters\": [ { \"name\": \"envoy.tcp_proxy\", \"config\": { \"cluster\": \"redis01\", \"stat_prefix\": \"envoy.tcp_proxy\", \"tracing\": { \"random_sampling\": {} }, \"access_log\": { \"name\": \"envoy.file_access_log\", \"typed_config\": { \"@type\": \"type.googleapis.com/envoy.config.accesslog.v2.FileAccessLog\", \"path\": \"/var/log/envoy/envoy_tcp.log\" } } } } ] } ] }"
+      }
+controller:
+  enabled: true
+ui:
+  service:
+    type: LoadBalancer
+    annotations: |
+      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-1.ric.gcp.hashidemos.io"
+meshGateway:
+  enabled: true
+  wanAddress:
+    source: Service
+  service:
+    type: LoadBalancer
+
+ingressGateways:
+  enabled: true
+  defaults:
+    service:
+      type: LoadBalancer
+      ports:
+        - port: 443
+  gateways:
+    - name: dashboard-ingress-gateway
+      service:
+        annotations: |
+          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-1.ric.gcp.hashidemos.io"
+    - name: webapp-ingress-gateway
+      service:
+        annotations: |
+          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-1.ric.gcp.hashidemos.io"
+
+terminatingGateways:
+  enabled: true
+  gateways:
+    - name: counting-terminating-gateway
