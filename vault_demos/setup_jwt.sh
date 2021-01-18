@@ -14,12 +14,12 @@ _decode_base64_url() {
 # $2 => either 1 for header or 2 for body (default is 2)
 decode_jwt() { _decode_base64_url $(echo -n $1 | cut -d "." -f ${2:-2}) | jq 'if .exp then (.expStr = (.exp|gmtime|strftime("%Y-%m-%dT%H:%M:%S %Z"))) else . end'; }
 
-
+VAULT_HOSTNAME=$(kubectl get svc vault-active  -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'})
 vault auth enable jwt || true
 
 
 vault  write  identity/oidc/config \
-  issuer=https://vault-1-server.ric.gcp.hashidemos.io:8200
+  issuer=https://$VAULT_HOSTNAME:8200
 
 vault write identity/oidc/key/test_key allowed_client_ids="*"
 vault read  identity/oidc/key/test_key
@@ -64,7 +64,7 @@ decode_jwt $JWT_TOKEN 2
 echo "OpenID config"
 curl -sk \
   --request GET \
-  https://vault-1-server.ric.gcp.hashidemos.io:8200/v1/identity/oidc/.well-known/openid-configuration \
+  https://$VAULT_HOSTNAME:8200/v1/identity/oidc/.well-known/openid-configuration \
   | jq .
 
 ### Setting up JWT auth in Vault
@@ -72,7 +72,7 @@ curl -sk \
 echo "Setting up JWT auth in Vault"
 # Configure the JWT method using your tenant ID:
 vault write auth/jwt/config \
-    oidc_discovery_url="https://vault-1-server.ric.gcp.hashidemos.io:8200/v1/identity/oidc" \
+    oidc_discovery_url="https://$VAULT_HOSTNAME:8200/v1/identity/oidc" \
     oidc_discovery_ca_pem=@cluster-1-ca.pem \
     default_role="test_app"
 

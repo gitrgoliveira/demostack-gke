@@ -1,12 +1,12 @@
 
 function c1_kctx {
-    kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-1)
+    kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-1-gke)
 }
 function c2_kctx {
-    kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-2)
+    kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-2-gke)
 }
 function c3_kctx {
-    kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-3)
+    kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-3-gke)
 }
 
 function vault1_ctx {
@@ -36,7 +36,7 @@ function c3_kctl {
 }
 
 function setup-consul {
-    kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-1)
+    kubectl config use-context $(kubectl config get-contexts -o name | grep cluster-1-gke)
     export CONSUL_HTTP_TOKEN=$(kubectl get secrets  consul-bootstrap-acl-token -o jsonpath={..token} | base64 -D)
     export CONSUL_HTTP_ADDR=https://$(kubectl get svc consul-ui -o jsonpath={..ip})
     echo -n | openssl s_client -connect ${CONSUL_HTTP_ADDR//https:\/\/}:443  | \

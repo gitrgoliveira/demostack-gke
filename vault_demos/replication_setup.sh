@@ -45,7 +45,3 @@ vault operator generate-root -format=json -nonce=$(cat nonce.delete) $(grep -h '
 vault operator generate-root \
   -decode=$(cat encoded_token.delete) \
   -otp=$(cat otp.delete) > cluster-2.root_token
-
-
-# detect_endpoints;
-# c1_kctx;

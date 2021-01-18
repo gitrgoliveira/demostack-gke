@@ -1,9 +1,10 @@
 #! /bin/bash
 source helper.sh
 
-source vault_demos/replication_setup.sh
 
 vault1_ctx
+source vault_demos/replication_setup.sh
+
 vault secrets enable -version=2 kv
 vault kv put kv/test message='Hello world'
 
