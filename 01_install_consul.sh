@@ -2,11 +2,7 @@
 source setup_kubeconfig.sh
 source helper.sh
 
-## setting up DNS first
-# c1_kctl apply -f dns/ExternalDNS-cluster-1.yaml
-# c2_kctl apply -f dns/ExternalDNS-cluster-2.yaml
-
-# setting up gossip
+# setting up gossip encryption
 consul keygen > gossipEncryptionKey
 
 CONSUL_HELM_VERSION=0.28.0
