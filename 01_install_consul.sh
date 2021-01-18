@@ -9,7 +9,7 @@ source helper.sh
 # setting up gossip
 consul keygen > gossipEncryptionKey
 
-CONSUL_HELM_VERSION=0.27.0
+CONSUL_HELM_VERSION=0.28.0
 helm repo add hashicorp https://helm.releases.hashicorp.com
 helm repo update
 c1_kctx
