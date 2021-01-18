@@ -50,9 +50,9 @@ function detect_endpoints {
     echo "================================================================"
     echo ".: End points detected:"
     c1_kctx 2>&1 1>/dev/null
-    echo $(kubectl get svc -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'}) | tr ' ' '\n'
+    echo $(kubectl get svc -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'}) | tr ' ' '\n' | uniq
     c2_kctx 2>&1 1>/dev/null
-    echo $(kubectl get svc -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'}) | tr ' ' '\n'
+    echo $(kubectl get svc -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'}) | tr ' ' '\n' | uniq
     echo "================================================================"
     echo "Token: $(c1_kctl get secrets  consul-bootstrap-acl-token -o jsonpath={..token} | base64 -D)"
     echo "================================================================"
