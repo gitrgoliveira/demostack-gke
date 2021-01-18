@@ -19,6 +19,7 @@ kubectl delete vault-kms-config
 
 rm -f token.jwt
 rm -f *.delete
+rm -f example.*
 rm -f *.root_token
 rm -f *.pem
 rm -f *.cert
