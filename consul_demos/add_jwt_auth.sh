@@ -1,11 +1,31 @@
 #! /bin/bash
 
+tee consul_rules.hcl <<EOF >/dev/null
+acl = "read"
+service_prefix "" {
+  policy = "read"
+  intentions = "read"
+}
+
+node_prefix "" {
+  policy = "read"
+}
+EOF
+consul acl policy create -name=read-only \
+    -description="Can read any node, service and ACL" \
+    -valid-datacenter cluster-1 -valid-datacenter cluster-2 \
+    -namespace=webapp \
+    -rules @consul_rules.hcl
+rm consul_rules.hcl
+
+consul acl role create -name=read-only-role \
+    -description "A role that allows read-only operations" \
+    -namespace=webapp \
+    -policy-name=read-only \
+    -service-identity "test_app:cluster-1"
+
 VAULT_HOSTNAME=$(kubectl get svc vault-active  -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'})
-
 OIDCDiscoveryURL="https://$VAULT_HOSTNAME:8200/v1/identity/oidc"
-
-#  Failed to create new auth method: Unexpected response code: 500 (rpc error making call: Invalid Auth Method: exactly one of 'JWTValidationPubKeys', 'JWKSURL', or 'OIDCDiscoveryURL' must be set for type "jwt")
-
 
 echo "Setting up OIDC"
 tee consul_jwt_auth_config.json <<EOF >/dev/null
@@ -18,13 +38,11 @@ tee consul_jwt_auth_config.json <<EOF >/dev/null
     }
 }
 EOF
-
 consul acl auth-method create -type=jwt \
     -namespace=webapp \
     -name=vault-jwt \
     -description="Consul JWT auth method to receive Vault generated JWTs" \
     -config=@consul_jwt_auth_config.json
-
 rm consul_jwt_auth_config.json
 
 
