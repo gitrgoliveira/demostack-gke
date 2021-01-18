@@ -1,0 +1,16 @@
+global:
+  scrape_interval:  5s
+  scrape_timeout: 3s
+
+alertmanager:
+  enabled: false
+
+server:
+  enabled: true
+  persistentVolume:
+    enabled: false
+  service:
+    type: LoadBalancer
+
+pushgateway:
+  enabled: false
