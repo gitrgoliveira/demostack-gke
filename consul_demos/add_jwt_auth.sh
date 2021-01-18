@@ -1,6 +1,8 @@
 #! /bin/bash
 
-OIDCDiscoveryURL="https://vault-1-server.ric.gcp.hashidemos.io:8200/v1/identity/oidc"
+VAULT_HOSTNAME=$(kubectl get svc vault-active  -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'})
+
+OIDCDiscoveryURL="https://$VAULT_HOSTNAME:8200/v1/identity/oidc"
 
 #  Failed to create new auth method: Unexpected response code: 500 (rpc error making call: Invalid Auth Method: exactly one of 'JWTValidationPubKeys', 'JWKSURL', or 'OIDCDiscoveryURL' must be set for type "jwt")
 
@@ -33,9 +35,15 @@ consul acl binding-rule create \
     -namespace=webapp \
     -method=vault-jwt \
     -bind-type=service \
-    -description='Auth method created for Vault JWTs' \
+    -description='Auth method created for Services using Vault JWTs' \
     -bind-name='${value.service}' || true
 
+consul acl binding-rule create \
+    -namespace=webapp \
+    -method=vault-jwt \
+    -bind-type=role \
+    -description='Auth method created for Roles using Vault JWTs' \
+    -bind-name='${value.service}' || true
 
 echo "### Using a pre-created token for login"
 consul login -type=jwt \

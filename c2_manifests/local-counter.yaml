@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: local-counter
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: local-counter
+  labels:
+    app: local-counter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: local-counter
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        consul.hashicorp.com/connect-inject: "true"
+      labels:
+        app: local-counter
+    spec:
+      serviceAccountName: local-counter
+      containers:
+      - name: local-counter
+        image: hashicorp/counting-service:0.0.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9001
+          name: http

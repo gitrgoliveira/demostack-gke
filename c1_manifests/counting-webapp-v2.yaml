@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-v2
+  namespace: webapp
+  labels:
+    app: webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/connect-service-protocol: "http"
+        consul.hashicorp.com/connect-service-port: "5000"
+        consul.hashicorp.com/connect-service-upstreams: "local-counter.default:9001:cluster-2"
+        # consul.hashicorp.com/connect-service-upstreams: "external-counting.default:9001:cluster-1"
+        consul.hashicorp.com/service-tags: "v2"
+        consul.hashicorp.com/service-meta-version: "v2"
+      labels:
+        app: webapp
+    spec:
+      serviceAccountName: webapp
+      containers:
+      - name: webapp
+        image: ghcr.io/gitrgoliveira/minikube-consul/webapp:v2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+          name: http
+        env:
+        - name: COUNTING_SERVICE_URL
+          value: "http://localhost:9001"
+        - name: BG_COLOR
+          value: "PALEGREEN"
