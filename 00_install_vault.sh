@@ -8,7 +8,7 @@ source helper.sh
 c1_kctl apply -f dns/ExternalDNS-cluster-1.yaml
 c2_kctl apply -f dns/ExternalDNS-cluster-2.yaml
 
-VAULT_HELM_VERSION=0.8.0
+VAULT_HELM_VERSION=0.9.0
 
 source cross_tls.sh
 function setup-vault {

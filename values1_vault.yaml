@@ -11,7 +11,7 @@ server:
   # Use the Enterprise Image
   image:
     repository: "hashicorp/vault-enterprise"
-    tag: "1.6.0_ent"
+    tag: "1.6.1_ent"
 
   annotations:
     consul.hashicorp.com/connect-inject: "true"
