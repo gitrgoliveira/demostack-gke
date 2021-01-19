@@ -1,4 +1,5 @@
 #! /bin/bash
+source setup_kubeconfig.sh
 source helper.sh
 
 c1_kctx

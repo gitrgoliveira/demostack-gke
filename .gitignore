@@ -11,3 +11,4 @@ consul/*
 gossipEncryptionKey
 consul-federation-secret.yaml
 consul-acl-replication-acl-token.yaml
+cluster-1.cert
