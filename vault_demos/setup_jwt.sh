@@ -67,6 +67,9 @@ curl -sk \
   https://$VAULT_HOSTNAME:8200/v1/identity/oidc/.well-known/openid-configuration \
   | jq .
 
+
+
+
 ### Setting up JWT auth in Vault
 
 echo "Setting up JWT auth in Vault"
