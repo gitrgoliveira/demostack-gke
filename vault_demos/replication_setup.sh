@@ -1,7 +1,7 @@
 #! /bin/bash
 # source helper.sh
-set -eu
-set -o pipefail
+# set -eu
+# set -o pipefail
 
 vault1_ctx
 vault write -force  sys/replication/performance/primary/disable || true

@@ -1,7 +1,6 @@
 #! /bin/bash
 source helper.sh
 
-
 vault1_ctx
 source vault_demos/replication_setup.sh
 

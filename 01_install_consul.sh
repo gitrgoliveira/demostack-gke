@@ -1,5 +1,5 @@
 #! /bin/bash
-source setup_kubeconfig.sh
+# source setup_kubeconfig.sh
 source helper.sh
 
 # setting up gossip encryption
