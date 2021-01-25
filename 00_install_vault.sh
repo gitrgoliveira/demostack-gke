@@ -45,6 +45,11 @@ function setup-vault {
   sleep 15 # waiting for the unsealing process and for the nodes to join.
   fi
 
+  echo ".: Waiting for Cluster-$1 Vault Active Leader IP address"
+  while ! kubectl get svc vault-active -o jsonpath={..ip} --allow-missing-template-keys=false 2>/dev/null; do
+    sleep 3
+  done
+  echo ""
   export VAULT_ADDR=https://$(kubectl get svc vault-active -o jsonpath={..ip} --allow-missing-template-keys=false):8200
   echo "Checking if Vault $1 is ready"
   while ! curl -k $VAULT_ADDR/sys/health -s --show-error; do
