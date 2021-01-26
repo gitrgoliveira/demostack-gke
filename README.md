@@ -34,8 +34,8 @@ The following cli's must be installed:
 You'll need to change all the references to the hosted zone from `ric.gcp.hashidemos.io` to your own.
 
 These can be found in:
- * [dns/ExternalDNS-cluster-1.yaml]()
- * [dns/ExternalDNS-cluster-2.yaml]()
+ * [consul_config/webapp-ingress.hcl]()
+ * [tls_vault.sh]()
  * [values1_consul.yaml]()
  * [values1_vault.yaml]()
  * [values2_consul.yaml]()
