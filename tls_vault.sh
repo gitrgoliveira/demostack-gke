@@ -42,11 +42,12 @@ openssl req -new -key ${TMPDIR}/vault.key -subj "/CN=${SERVICE}.${NAMESPACE}.svc
 
 export CSR_NAME=vault-csr
 cat <<EOF >${TMPDIR}/csr.yaml
-apiVersion: certificates.k8s.io/v1beta1
+apiVersion: certificates.k8s.io/v1
 kind: CertificateSigningRequest
 metadata:
   name: ${CSR_NAME}
 spec:
+  signerName: kubernetes.io/kube-apiserver-client
   groups:
   - system:authenticated
   request: $(cat ${TMPDIR}/server.csr | base64 | tr -d '\n')
