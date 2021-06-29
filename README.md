@@ -34,12 +34,16 @@ The following cli's must be installed:
 You'll need to change all the references to the hosted zone from `ric.gcp.hashidemos.io` to your own.
 
 These can be found in:
- * [consul_config/webapp-ingress.hcl]()
- * [tls_vault.sh]()
- * [values1_consul.yaml]()
- * [values1_vault.yaml]()
- * [values2_consul.yaml]()
- * [values2_vault.yaml]()
+ * [consul_config/webapp-ingress.hcl](consul_config/webapp-ingress.hcl)
+ * [tls_vault.sh](tls_vault.sh)
+ * [values1_consul.yaml](values1_consul.yaml)
+ * [values1_vault.yaml](values1_vault.yaml)
+ * [values2_consul.yaml](values2_consul.yaml)
+ * [values2_vault.yaml](values2_vault.yaml)
+
+Change the `GOOGLE_PROJECT` reference in
+ * [values1_vault.yaml](values1_vault.yaml)
+ * [values2_vault.yaml](values2_vault.yaml)
 
 You will also need to ammend the places where a license is written:
  * 00_install_vault.sh (line 56)
