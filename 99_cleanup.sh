@@ -8,7 +8,8 @@ kubectl delete $(kubectl get pvc -o name | grep vault | tr '\n' ' ')
 kubectl delete csr vault-csr
 kubectl delete secret vault-server-tls
 kubectl delete secret tls-ca-cluster-2
-kubectl delete vault-kms-config
+kubectl delete secret vault-kms-config
+kubectl delete secret vault-license
 
 c2_kctx
 helm uninstall vault
@@ -16,7 +17,8 @@ kubectl delete $(kubectl get pvc -o name | grep vault | tr '\n' ' ')
 kubectl delete csr vault-csr
 kubectl delete secret vault-server-tls
 kubectl delete secret tls-ca-cluster-1
-kubectl delete vault-kms-config
+kubectl delete secret vault-kms-config
+kubectl delete secret vault-license
 
 rm -f token.jwt
 rm -f *.delete
