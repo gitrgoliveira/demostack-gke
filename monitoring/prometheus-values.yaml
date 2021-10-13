@@ -1,0 +1,8 @@
+server:
+  persistentVolume:
+    enabled: false
+  service:
+    type: LoadBalancer
+
+alertmanager:
+  enabled: false

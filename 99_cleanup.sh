@@ -35,10 +35,13 @@ helm uninstall consul
 helm uninstall prometheus
 helm uninstall grafana
 kubectl delete -f c1_manifests/
+kubectl delete -f c1_manifests/boundary
+kubectl delete -f c1_manifests/postgres
 kubectl delete -f bookinfo/bookinfo.yaml
 kubectl delete $(kubectl get pvc -o name | grep consul| tr '\n' ' ')
 kubectl delete $(kubectl get sa -o name | grep consul)
 kubectl delete $(kubectl get secrets -o name | grep consul)
+
 
 c2_kctx
 helm uninstall consul
@@ -54,3 +57,5 @@ kubectl delete $(kubectl get secrets -o name | grep consul)
 rm -f consul-federation-secret.yaml
 rm -f consul-acl-replication-acl-token.yaml
 rm -f external-counter.json
+
+rm boundary*.json

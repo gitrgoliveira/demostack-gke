@@ -8,7 +8,11 @@ source helper.sh
 c1_kctl apply -f dns/ExternalDNS-cluster-1.yaml
 c2_kctl apply -f dns/ExternalDNS-cluster-2.yaml
 
-VAULT_HELM_VERSION=0.9.0
+LICENSE_PATH=$HOME/licenses/vault_v2lic.hclic
+
+VAULT_HELM_VERSION=0.15.0
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo update
 
 source cross_tls.sh
 function setup-vault {
@@ -18,6 +22,9 @@ function setup-vault {
   kubectl create secret generic vault-kms-config \
     --from-file=seal_config.hcl
   rm -f seal_config.hcl
+
+  kubectl create secret generic vault-license \
+    --from-file=license=$LICENSE_PATH
 
   if helm status vault 2>&1 1>/dev/null; then
   helm upgrade vault hashicorp/vault -f values$1_vault.yaml \
@@ -57,8 +64,6 @@ function setup-vault {
     echo "Waiting for Vault $1 to be ready"
   done
   grep -h 'Initial Root Token' keys$1.txt | awk '{print $NF}' > cluster-$1.root_token
-  export VAULT_TOKEN=$(cat cluster-$1.root_token)
-  vault write /sys/license text=$(cat /Users/rgoliveira/Documents/vault_v2lic.hclic)
 }
 
 c1_kctx

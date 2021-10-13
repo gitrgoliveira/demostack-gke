@@ -7,8 +7,9 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: bastion
-  annotations:
-    consul.hashicorp.com/connect-inject: "true"
+  # annotations:
+  #   consul.hashicorp.com/connect-inject: "true"
+  #   consul.hashicorp.com/connect-service: "bastion"
   labels:
     app: bastion
 spec:

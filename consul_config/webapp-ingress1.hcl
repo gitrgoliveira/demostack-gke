@@ -1,5 +1,5 @@
 Kind = "ingress-gateway"
-Name = "webapp-ingress-gateway"
+Name = "webapp-cluster-1-ig"
 Namespace = "default"
 
 TLS {
@@ -14,7 +14,7 @@ Listeners = [
      {
         Name = "webapp"
         Namespace = "webapp"
-        Hosts = [ "webapp-cluster-1.ric.gcp.hashidemos.io", "webapp-cluster-2.ric.gcp.hashidemos.io" ]
+        Hosts = [ "webapp-cluster-1.ric.gcp.hashidemos.io"]
      }
    ]
  }

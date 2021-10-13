@@ -27,10 +27,11 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
         consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/connect-service: "dashboard-service"
         # consul.hashicorp.com/connect-service-upstreams: "prepared_query:local-counter:9001"
         consul.hashicorp.com/connect-service-upstreams: "local-counter.default:9001:cluster-2"
         # consul.hashicorp.com/connect-service-upstreams: "external-counting.default:9001:cluster-1"
-        consul.hashicorp.com/connect-service-protocol: "tcp"
+        # consul.hashicorp.com/connect-service-protocol: "tcp"
         consul.hashicorp.com/service-tags: "v2"
       labels:
         app: dashboard-service
@@ -56,8 +57,15 @@ metadata:
 spec:
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 9002
+    port: 9002
   selector:
     app: dashboard-service
-  type: NodePort
+  type: ClusterIP
+
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: dashboard-service
+spec:
+  protocol: 'http'

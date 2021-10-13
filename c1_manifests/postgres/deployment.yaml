@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+  namespace: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        service: postgres
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:12.3
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "boundary"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pg-admin-creds
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pg-admin-creds
+                  key: password
+          volumeMounts:
+            - mountPath: "/var/lib/postgresql"
+              name: "pgdata"
+      volumes:
+        - name: pgconf
+          secret:
+            secretName: "pg-admin-creds"
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: pg-pvc

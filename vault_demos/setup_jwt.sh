@@ -14,7 +14,7 @@ _decode_base64_url() {
 # $2 => either 1 for header or 2 for body (default is 2)
 decode_jwt() { _decode_base64_url $(echo -n $1 | cut -d "." -f ${2:-2}) | jq 'if .exp then (.expStr = (.exp|gmtime|strftime("%Y-%m-%dT%H:%M:%S %Z"))) else . end'; }
 
-VAULT_HOSTNAME=$(kubectl get svc vault-active  -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'})
+VAULT_HOSTNAME=$(kubectl get svc vault-ui  -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'})
 vault auth enable jwt || true
 
 

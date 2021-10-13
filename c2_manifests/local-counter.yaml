@@ -20,6 +20,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
         consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/connect-service: "local-counter"
       labels:
         app: local-counter
     spec:
@@ -31,3 +32,27 @@ spec:
         ports:
         - containerPort: 9001
           name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    consul.hashicorp.com/service-sync: 'false'
+  name: local-counter
+  labels:
+    app: local-counter
+spec:
+  ports:
+  - protocol: TCP
+    port: 9001
+  selector:
+    app: local-counter
+  type: ClusterIP
+
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: local-counter
+spec:
+  protocol: 'tcp'

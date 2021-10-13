@@ -17,9 +17,11 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
         consul.hashicorp.com/connect-inject: "true"
-        consul.hashicorp.com/connect-service-protocol: "http"
+        consul.hashicorp.com/connect-service: "webapp"
+        # consul.hashicorp.com/connect-service-protocol: "http"
         consul.hashicorp.com/connect-service-port: "5000"
-        consul.hashicorp.com/connect-service-upstreams: "local-counter.default:9001:cluster-2"
+        # consul.hashicorp.com/connect-service-upstreams: "local-counter.default:9001:cluster-2"
+        consul.hashicorp.com/connect-service-upstreams: "local-counter.default:9001"
         # consul.hashicorp.com/connect-service-upstreams: "external-counting.default:9001:cluster-1"
         consul.hashicorp.com/service-tags: "v2"
         consul.hashicorp.com/service-meta-version: "v2"
@@ -39,3 +41,11 @@ spec:
           value: "http://localhost:9001"
         - name: BG_COLOR
           value: "PALEGREEN"
+
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: webapp
+spec:
+  protocol: 'http'

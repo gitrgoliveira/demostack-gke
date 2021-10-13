@@ -4,12 +4,21 @@ global:
 # Vault Helm Chart Value Overrides
 injector:
   enabled: false
+  metrics:
+    enabled: true
 
 server:
   # Use the Enterprise Image
   image:
     repository: "hashicorp/vault-enterprise"
-    tag: "1.6.1_ent"
+    tag: "1.8.4_ent"
+
+  enterpriseLicense:
+    # The name of the Kubernetes secret that holds the enterprise license. The
+    # secret must be in the same namespace that Vault is installed into.
+    secretName: "vault-license"
+    # The key within the Kubernetes secret that holds the enterprise license.
+    secretKey: "license"
 
   annotations:
     consul.hashicorp.com/connect-inject: "true"
@@ -30,8 +39,7 @@ server:
   # used to include variables required for auto-unseal.
   extraEnvironmentVars:
     VAULT_CACERT: /vault/userconfig/vault-server-tls/vault.ca
-    GOOGLE_REGION: global
-    GOOGLE_PROJECT: rgoliveira-test-project
+
 
   # extraVolumes is a list of extra volumes to mount. These will be exposed
   # to Vault in the path `/vault/userconfig/<name>/`.
@@ -49,6 +57,7 @@ server:
   ha:
     enabled: true
     replicas: 3
+    apiAddr: "https://vault-2.ric.gcp.hashidemos.io:8200"
     raft:
       enabled: true
 
@@ -57,12 +66,13 @@ server:
         log_level = "Debug"
         listener "tcp" {
           address = "[::]:8200"
-          cluster_address = "[::]:8201"
           tls_cert_file = "/vault/userconfig/vault-server-tls/vault.crt"
           tls_key_file = "/vault/userconfig/vault-server-tls/vault.key"
           tls_client_ca_file = "/vault/userconfig/vault-server-tls/vault.ca"
           tls_disable_client_certs = true
         }
+
+        cluster_addr = "https://vault-2.ric.gcp.hashidemos.io:8201"
 
         storage "raft" {
           path = "/vault/data"
@@ -88,7 +98,7 @@ server:
 
 # Vault UI
 ui:
-  enabled: false
+  enabled: true
   serviceType: "LoadBalancer"
   externalPort: 8200
   annotations:

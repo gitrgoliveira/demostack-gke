@@ -4,10 +4,56 @@ metadata:
   name: webapp
 ---
 apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    consul.hashicorp.com/service-sync: 'false'
+  name: webapp
+  namespace: webapp
+  labels:
+    app: webapp
+spec:
+  ports:
+  - protocol: TCP
+    port: 5000
+  selector:
+    app: webapp
+  type: LoadBalancer
+---
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: webapp
   namespace: webapp
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: webapp-role
+  namespace: webapp
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: webapp
+  namespace: webapp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: webapp-role
+subjects:
+- kind: ServiceAccount
+  name: webapp
+  namespace: webapp
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -27,9 +73,10 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
         consul.hashicorp.com/connect-inject: "true"
-        consul.hashicorp.com/connect-service-protocol: "http"
+        consul.hashicorp.com/connect-service: "webapp"
         consul.hashicorp.com/connect-service-port: "5000"
-        consul.hashicorp.com/connect-service-upstreams: "local-counter.default:9001:cluster-2"
+        # consul.hashicorp.com/connect-service-upstreams: "local-counter.default:9001:cluster-2"
+        consul.hashicorp.com/connect-service-upstreams: "local-counter.default:9001"
         # consul.hashicorp.com/connect-service-upstreams: "external-counting.default:9001:cluster-1"
         consul.hashicorp.com/service-tags: "v1"
         consul.hashicorp.com/service-meta-version: "v1"
@@ -49,18 +96,13 @@ spec:
           value: "http://localhost:9001"
         - name: BG_COLOR
           value: "WHITE"
+
+
 ---
-apiVersion: v1
-kind: Service
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
 metadata:
   name: webapp
   namespace: webapp
-  labels:
-    app: webapp
 spec:
-  ports:
-  - protocol: TCP
-    port: 5000
-  selector:
-    app: webapp
-  type: LoadBalancer
+  protocol: 'http'

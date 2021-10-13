@@ -1,11 +1,13 @@
 output "region" {
   value       = var.region
   description = "region"
+  sensitive = false
 }
 
 output "kubernetes_cluster_name" {
   value       = google_container_cluster.primary.name
   description = "GKE Cluster Name"
+  sensitive = false
 }
 
 output "gcpckms" {
@@ -17,4 +19,5 @@ output "gcpckms" {
     crypto_key  = "${google_kms_crypto_key.crypto_key.name}"
   }
   EOF
+  sensitive = false
 }

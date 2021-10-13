@@ -56,12 +56,12 @@ consul acl binding-rule create \
     -description='Auth method created for Services using Vault JWTs' \
     -bind-name='${value.service}' || true
 
-consul acl binding-rule create \
-    -namespace=webapp \
-    -method=vault-jwt \
-    -bind-type=role \
-    -description='Auth method created for Roles using Vault JWTs' \
-    -bind-name='${value.service}' || true
+# consul acl binding-rule create \
+#     -namespace=webapp \
+#     -method=vault-jwt \
+#     -bind-type=role \
+#     -description='Auth method created for Roles using Vault JWTs' \
+#     -bind-name='${value.service}' || true
 
 echo "### Using a pre-created token for login"
 consul login -type=jwt \

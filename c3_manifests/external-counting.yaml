@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: external-counting
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-counting
+  labels:
+    app: external-counting
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: external-counting
+  template:
+    metadata:
+      labels:
+        app: external-counting
+    spec:
+      containers:
+      - name: external-counting
+        image: hashicorp/counting-service:0.0.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9001
+          name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-counting
+  labels:
+    app: external-counting
+spec:
+  ports:
+  - protocol: TCP
+    port: 9001
+  selector:
+    app: external-counting
+  type: LoadBalancer

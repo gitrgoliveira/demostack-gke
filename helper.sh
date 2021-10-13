@@ -51,6 +51,7 @@ function detect_endpoints {
     echo ".: End points detected:"
     c1_kctx 2>&1 1>/dev/null
     echo $(kubectl get svc -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'}) | tr ' ' '\n' | uniq
+    echo $(kubectl get svc -n boundary -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'}) | tr ' ' '\n' | uniq
     c2_kctx 2>&1 1>/dev/null
     echo $(kubectl get svc -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'}) | tr ' ' '\n' | uniq
     echo "================================================================"
