@@ -11,7 +11,7 @@ server:
   # Use the Enterprise Image
   image:
     repository: "hashicorp/vault-enterprise"
-    tag: "1.8.4_ent"
+    tag: "1.9.2-ent"
 
   enterpriseLicense:
     # The name of the Kubernetes secret that holds the enterprise license. The
@@ -19,12 +19,6 @@ server:
     secretName: "vault-license"
     # The key within the Kubernetes secret that holds the enterprise license.
     secretKey: "license"
-
-  annotations:
-    consul.hashicorp.com/connect-inject: "true"
-    consul.hashicorp.com/connect-service-protocol: "tcp"
-    consul.hashicorp.com/connect-service-port: "8200"
-    consul.hashicorp.com/service-tags: "secondary"
 
   service:
     enabled: true
@@ -64,29 +58,22 @@ server:
       config: |
         ui = true
         log_level = "Debug"
+
         listener "tcp" {
           address = "[::]:8200"
+          cluster_address = "[::]:8201"
           tls_cert_file = "/vault/userconfig/vault-server-tls/vault.crt"
           tls_key_file = "/vault/userconfig/vault-server-tls/vault.key"
           tls_client_ca_file = "/vault/userconfig/vault-server-tls/vault.ca"
           tls_disable_client_certs = true
         }
 
-        cluster_addr = "https://vault-2.ric.gcp.hashidemos.io:8201"
-
         storage "raft" {
           path = "/vault/data"
           retry_join {
-            leader_api_addr = "https://vault-0.vault-internal:8200"
+            leader_tls_servername = "vault-2.ric.gcp.hashidemos.io"
             leader_ca_cert_file = "/vault/userconfig/vault-server-tls/vault.ca"
-          }
-          retry_join {
-            leader_api_addr = "https://vault-1.vault-internal:8200"
-            leader_ca_cert_file = "/vault/userconfig/vault-server-tls/vault.ca"
-          }
-          retry_join {
-            leader_api_addr = "https://vault-2.vault-internal:8200"
-            leader_ca_cert_file = "/vault/userconfig/vault-server-tls/vault.ca"
+            auto_join = "provider=k8s label_selector=\"app.kubernetes.io/name=vault, component=server\""
           }
         }
 

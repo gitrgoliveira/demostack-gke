@@ -45,6 +45,8 @@ kubectl delete $(kubectl get secrets -o name | grep consul)
 
 c2_kctx
 helm uninstall consul
+helm uninstall prometheus
+helm uninstall grafana
 kubectl delete -f consul-federation-secret.yaml
 kubectl delete -f consul-acl-replication-acl-token.yaml
 kubectl delete -f c2_manifests/

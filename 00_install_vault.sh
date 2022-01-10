@@ -10,7 +10,7 @@ c2_kctl apply -f dns/ExternalDNS-cluster-2.yaml
 
 LICENSE_PATH=$HOME/licenses/vault_v2lic.hclic
 
-VAULT_HELM_VERSION=0.15.0
+VAULT_HELM_VERSION=0.18.0
 helm repo add hashicorp https://helm.releases.hashicorp.com
 helm repo update
 
