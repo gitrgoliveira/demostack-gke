@@ -56,3 +56,10 @@ resource "google_project_iam_member" "dnsadmin" {
   member  = "serviceAccount:${google_service_account.vault_kms_service_account.email}"
   role    = "roles/dns.admin"
 }
+
+resource "google_project_iam_member" "storageviewer" {
+  project = var.project
+  member  = "serviceAccount:${google_service_account.vault_kms_service_account.email}"
+  role    = "roles/storage.objectViewer"
+}
+
