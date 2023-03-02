@@ -1,44 +1,43 @@
 global:
   name: consul
-  image: hashicorp/consul-enterprise:1.10.3-ent
+  image: hashicorp/consul-enterprise:1.14-ent
   datacenter: cluster-1
+  peering:
+    enabled: true
+  adminPartitions:
+    enabled: true
   enableConsulNamespaces: true
+  enterpriseLicense:
+    secretName: "consul-license"
+    secretKey: "license"
   gossipEncryption:
+    autoGenerate: false
     secretName: consul-gossipencryptionkey
     secretKey: key
-  federation:
-    enabled: true
-    createFederationSecret: true
   tls:
     enabled: true
     httpsOnly: false
     enableAutoEncrypt: true
     verify: false
-    serverAdditionalDNSSANs: ["consul-cluster-1.ric.gcp.hashidemos.io"]
+    serverAdditionalDNSSANs: ["consul-cluster-1.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"]
   acls:
     manageSystemACLs: true
-    createReplicationToken: true
   metrics:
     enabled: true
     enableAgentMetrics: true
+
 server:
-  enterpriseLicense:
-    # The name of the Kubernetes secret that holds the enterprise license.
-    # The secret must be in the same namespace that Consul is installed into.
-    secretName: "consul-license"
-    # The key within the Kubernetes secret that holds the enterprise license.
-    secretKey: "license"
-  service:
-      annotations: |
-        "prometheus.io/scrape": "true"
-        "prometheus.io/scheme": "https"
-        "prometheus.io/path" : "/v1/agent/metrics?format=prometheus"
+  replicas: 3
+  resources:
+    requests:
+      memory: "16Gi"
+      cpu: "4.0"
+    limits:
+      memory: "32Gi"
+      cpu: "8.0"
+
   extraConfig: |
     {
-      "telemetry": {
-        "prometheus_retention_time": "10s",
-        "disable_hostname": true
-      },
       "log_level": "INFO",
       "dns_config": {
         "service_ttl": {
@@ -61,51 +60,37 @@ server:
         }
       }
     }
+
 connectInject:
   enabled: true
+  transparentProxy:
+    defaultEnabled: true
+  cni:
+    enabled: true
+    logLevel: info
+    cniBinDir: "/home/kubernetes/bin"
+    cniNetDir: "/etc/cni/net.d"
   metrics:
     defaultEnabled: true
     defaultEnableMerging: true
   consulNamespaces:
     mirroringK8S: true
-  # envoyExtraArgs: -admin-access-log-path="/var/log/envoy-access.log"
-
-  # centralConfig:
-  #   enabled: true
-  #   defaultProtocol: 'http'
-  #   # proxyDefaults: |
-  #   #   {
-  #   #     "envoy_prometheus_bind_addr": "0.0.0.0:9102",
-  #   #     "envoy_extra_static_clusters_json": "{\"connect_timeout\": \"3.000s\", \"dns_lookup_family\": \"V4_ONLY\", \"lb_policy\": \"ROUND_ROBIN\", \"load_assignment\": { \"cluster_name\": \"zipkin\", \"endpoints\": [ { \"lb_endpoints\": [ { \"endpoint\": { \"address\": { \"socket_address\": { \"address\": \"zipkin.default\", \"port_value\": 9411, \"protocol\": \"TCP\" } } } } ] } ] }, \"name\": \"zipkin\", \"type\": \"STRICT_DNS\" }",
-  #   #     "envoy_tracing_json":"{ \"http\": { \"config\": { \"collector_cluster\": \"zipkin\", \"collector_endpoint\": \"/api/v2/spans\"}, \"name\": \"envoy.tracers.zipkin\" }}",
-  #   #     "envoy_public_listener_json" : "{ \"name\": \"local_agent\", \"address\": { \"socket_address\": { \"address\": \"0.0.0.0\", \"port_value\": 20002 } }, \"filter_chains\": [ { \"filters\": [ { \"name\": \"envoy.tcp_proxy\", \"config\": { \"cluster\": \"redis01\", \"stat_prefix\": \"envoy.tcp_proxy\", \"tracing\": { \"random_sampling\": {} }, \"access_log\": { \"name\": \"envoy.file_access_log\", \"typed_config\": { \"@type\": \"type.googleapis.com/envoy.config.accesslog.v2.FileAccessLog\", \"path\": \"/var/log/envoy-access.log\" } } } } ] } ] }"
-  #   #   }
-  #   proxyDefaults: |
-  #     {
-  #       "envoy_prometheus_bind_addr": "0.0.0.0:9102",
-  #       "envoy_extra_static_clusters_json": "{\"connect_timeout\": \"3.000s\", \"dns_lookup_family\": \"V4_ONLY\", \"lb_policy\": \"ROUND_ROBIN\", \"load_assignment\": { \"cluster_name\": \"zipkin\", \"endpoints\": [ { \"lb_endpoints\": [ { \"endpoint\": { \"address\": { \"socket_address\": { \"address\": \"zipkin.default\", \"port_value\": 9411, \"protocol\": \"TCP\" } } } } ] } ] }, \"name\": \"zipkin\", \"type\": \"STRICT_DNS\" }",
-  #       "envoy_tracing_json":"{ \"http\": { \"config\": { \"collector_cluster\": \"zipkin\", \"collector_endpoint\": \"/api/v2/spans\"}, \"name\": \"envoy.tracers.zipkin\" }}"
-  #     }
 
 syncCatalog:
   enabled: true
   toConsul: true
   toK8S: false
   default: true
-  addK8SNamespaceSuffix: false
+  addK8SNamespaceSuffix: "c1-"
   consulNamespaces:
     mirroringK8S: true
-  aclSyncToken:
-    secretName: consul-catalog-sync-acl-token
-    secretKey: token
+    mirroringK8SPrefix: "c1-"
 
-controller:
-  enabled: true
 ui:
   service:
     type: LoadBalancer
     annotations: |
-      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-1.ric.gcp.hashidemos.io"
+      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-1.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"
 meshGateway:
   enabled: true
   wanAddress:
@@ -119,28 +104,25 @@ ingressGateways:
     service:
       type: LoadBalancer
       ports:
-        - port: 443
+        - port: 8443
   gateways:
     - name: dashboard-ingress-gateway
       service:
         annotations: |
           prometheus.io/scrape: "true"
           prometheus.io/port: "9102"
-          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-1.ric.gcp.hashidemos.io"
+          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-1.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"
     - name: webapp-cluster-1-ig
       service:
         annotations: |
           prometheus.io/scrape: "true"
           prometheus.io/port: "9102"
-          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-1.ric.gcp.hashidemos.io"
-    - name: all-ingress-gateway
-      service:
-        annotations: |
-          prometheus.io/scrape: "true"
-          prometheus.io/port: "9102"
-          external-dns.alpha.kubernetes.io/hostname: "all.ric.gcp.hashidemos.io"
+          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-1.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"
 
-terminatingGateways:
+# terminatingGateways:
+#   enabled: true
+#   gateways:
+#     - name: google-terminating-gateway
+
+prometheus:
   enabled: true
-  gateways:
-    - name: google-terminating-gateway

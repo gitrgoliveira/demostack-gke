@@ -3,13 +3,14 @@ source helper.sh
 # set -eu
 # set -o pipefail
 
-c1_kctx
-source consul_demos/add_monitoring.sh
+# c1_kctx
+# source consul_demos/add_monitoring.sh
 
 c1_kctl apply -f c1_manifests/
 c2_kctl apply -f c2_manifests/
-setup-consul 2>&1 1>/dev/null
 
+c1_kctx
+setup-consul 2>&1 1>/dev/null
 
 # Setting up a generic failover query
 curl -k --request POST \
@@ -19,28 +20,30 @@ curl -k --request POST \
 
 
 echo ".: adding Consul configurations"
-consul config write consul_config/dashboard-defaults.hcl
-consul config write consul_config/webapp-defaults.hcl
-consul config write consul_config/webapp-resolver.hcl
-consul config write consul_config/webapp-splitter.hcl
-consul config write consul_config/webapp-router.hcl
-consul config write consul_config/local-counter-resolver.hcl
+# consul config write consul_config/dashboard-defaults.hcl
+# consul config write consul_config/webapp-defaults.hcl
+# consul config write consul_config/webapp-resolver.hcl
+# consul config write consul_config/webapp-splitter.hcl
+# consul config write consul_config/webapp-router.hcl
+
+# consul config write consul_config/local-counter-resolver.hcl //no
 
 
-consul config write consul_config/dashboard-ingress-tcp.hcl
-consul config write consul_config/webapp-ingress1.hcl
-consul config write consul_config/webapp-ingress2.hcl
+# consul config write consul_config/dashboard-ingress-tcp.hcl
+# consul config write consul_config/webapp-ingress1.hcl
+
+# consul config write consul_config/webapp-ingress2.hcl //no
 
 # Setup default deny intention.
-consul intention create -deny "*/*" "*/*" || true
+# consul intention create -deny "*/*" "*/*" || true
 # Setup allow intentions
 # consul intention create -allow "dashboard-service/dashboard-service" default/external-counting || true
 # consul intention create -allow "webapp/webapp" default/external-counting || true
-consul intention create -allow "dashboard-service/dashboard-service" default/local-counter || true
-consul intention create -allow "webapp/webapp" default/local-counter || true
-consul intention create -allow dashboard-ingress-gateway "dashboard-service/dashboard-service" || true
-consul intention create -allow webapp-cluster-1-ig "webapp/webapp" || true
-consul intention create -allow webapp-cluster-2-ig "webapp/webapp" || true
+# consul intention create -allow "dashboard-service/dashboard-service" default/local-counter || true
+# consul intention create -allow "webapp/webapp" default/local-counter || true
+# consul intention create -allow dashboard-ingress-gateway "dashboard-service/dashboard-service" || true
+# consul intention create -allow webapp-cluster-1-ig "webapp/webapp" || true
+# consul intention create -allow webapp-cluster-2-ig "webapp/webapp" || true
 
 c1_kctx
 kubectl wait --for=condition=ready pod/bastion
@@ -48,6 +51,7 @@ kubectl exec -it bastion -- apt update
 kubectl exec -it bastion -- apt install -y dnsutils iputils-ping
 #** to get to the bastion:
 # kubectl exec -it bastion -- bash
+exit
 source consul_demos/azure_AD_consul.sh
 # source consul_demos/add_jwt_auth.sh
 

@@ -4,7 +4,7 @@ kind: Service
 metadata:
   annotations:
     consul.hashicorp.com/service-sync: "true"
-    external-dns.alpha.kubernetes.io/hostname: boundary-api.ric.gcp.hashidemos.io
+    external-dns.alpha.kubernetes.io/hostname: boundary-api.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com
   name: boundary-api
   labels:
     app: boundary
@@ -23,7 +23,7 @@ kind: Service
 metadata:
   annotations:
     consul.hashicorp.com/service-sync: "true"
-    external-dns.alpha.kubernetes.io/hostname: boundary-cluster.ric.gcp.hashidemos.io
+    external-dns.alpha.kubernetes.io/hostname: boundary-cluster.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com
   name: boundary-cluster
   labels:
     app: boundary
@@ -42,7 +42,7 @@ kind: Service
 metadata:
   annotations:
     consul.hashicorp.com/service-sync: "true"
-    external-dns.alpha.kubernetes.io/hostname: boundary-proxy.ric.gcp.hashidemos.io
+    external-dns.alpha.kubernetes.io/hostname: boundary-proxy.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com
   name: boundary-proxy
   labels:
     app: boundary

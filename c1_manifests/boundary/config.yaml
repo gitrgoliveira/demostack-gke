@@ -20,8 +20,8 @@ data:
       name = "gke-worker"
       description = "A worker in gke"
       address = "0.0.0.0"
-      controllers = ["boundary-cluster.ric.gcp.hashidemos.io:9201"]
-      public_addr = "boundary-proxy.ric.gcp.hashidemos.io"
+      controllers = ["boundary-cluster.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com:9201"]
+      public_addr = "boundary-proxy.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"
       tags {
         cluster = ["cluster-1"]
       }

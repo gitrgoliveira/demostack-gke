@@ -19,7 +19,9 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
+        consul.hashicorp.com/enable-metrics-merging: "false"
         consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/transparent-proxy: "true"
         consul.hashicorp.com/connect-service: "local-counter"
         # consul.hashicorp.com/connect-service-protocol: "tcp"
         consul.hashicorp.com/connect-service-port: "9001"
@@ -55,5 +57,27 @@ apiVersion: consul.hashicorp.com/v1alpha1
 kind: ServiceDefaults
 metadata:
   name: local-counter
+  namespace: default
 spec:
-  protocol: 'tcp'
+  protocol: 'http'
+  transparentProxy:
+    dialedDirectly: true
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: local-counter
+spec:
+  destination:
+    name: local-counter
+    namespace: default
+  sources:
+    - name: webapp
+      namespace: webapp
+      permissions:
+        - action: allow
+          http:
+            pathPrefix: '/'
+    - name: dashboard-service
+      namespace: dashboard-service
+      action: allow

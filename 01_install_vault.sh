@@ -1,16 +1,11 @@
 #! /bin/bash
-source setup_kubeconfig.sh
-source helper.sh
 # set -eu
 # set -o pipefail
-
-## setting up DNS first
-c1_kctl apply -f dns/ExternalDNS-cluster-1.yaml
-c2_kctl apply -f dns/ExternalDNS-cluster-2.yaml
+source helper.sh
 
 LICENSE_PATH=$HOME/licenses/vault_v2lic.hclic
 
-VAULT_HELM_VERSION=0.18.0
+VAULT_HELM_VERSION=0.23.0
 helm repo add hashicorp https://helm.releases.hashicorp.com
 helm repo update
 
@@ -48,7 +43,7 @@ function setup-vault {
   vault operator init -status || vaultinit=$?
   if [ $vaultinit -eq 2 ]; then
   echo "Initializing Vault $1 cluster"
-  vault operator init -recovery-shares=1 -recovery-threshold=1 > keys$1.txt
+  kubectl exec -it vault-0 -- vault operator init -format=json -recovery-shares=1 -recovery-threshold=1 > keys$1.txt
   sleep 15 # waiting for the unsealing process and for the nodes to join.
   fi
 
@@ -63,7 +58,7 @@ function setup-vault {
     sleep 2
     echo "Waiting for Vault $1 to be ready"
   done
-  grep -h 'Initial Root Token' keys$1.txt | awk '{print $NF}' > cluster-$1.root_token
+  jq -r .root_token keys$1.txt > cluster-$1.root_token
 }
 
 c1_kctx

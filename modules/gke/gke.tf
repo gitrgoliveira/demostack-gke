@@ -41,11 +41,13 @@ resource "google_container_node_pool" "primary_nodes" {
       project = var.project
     }
 
-    preemptible  = true
-    machine_type = "n1-standard-2"
+    preemptible  = false
+    machine_type = "n2d-highmem-8"
+    spot = true
     tags         = ["gke-node", "${var.namespace}-gke"]
     metadata = {
       disable-legacy-endpoints = "true"
     }
   }
+  
 }

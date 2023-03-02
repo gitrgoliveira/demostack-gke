@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boundary-worker-k8s
+  namespace: boundary
+  labels:
+    app: boundary
+    component: worker
+    env: k8s
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: boundary
+      component: worker
+      env: k8s
+  template:
+    metadata:
+      labels:
+        app: boundary
+        component: worker
+        env: k8s
+    spec:
+      containers:
+      - name: boundary-worker
+        image: hashicorp/boundary:0.3.0
+        args: [ "server", "-config", "/etc/boundary/boundary-worker.hcl" ]
+        ports:
+        - containerPort: 9202
+        volumeMounts:
+        - mountPath: /etc/boundary
+          name: boundary-config
+        securityContext:
+          capabilities:
+            add: [ "IPC_LOCK" ]
+      volumes:
+      - name: boundary-config
+        configMap:
+          name: boundary-k8s-worker-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: boundary-k8s-worker-svc
+  namespace: boundary
+spec:
+  type: NodePort
+  selector:
+    app: boundary
+    component: worker
+    env: k8s
+  ports:
+  - port: 9204
+    nodePort: 30922
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: boundary
+  name: boundary-k8s-worker-config
+data:
+  boundary-worker.hcl: |
+    listener "tcp" {
+      purpose = "proxy"
+      address = "0.0.0.0"
+      tls_disable = "true"
+    }
+
+    worker {
+      name = "boundary-worker-k8s"
+      description = "Demo worker instance"
+      address = "0.0.0.0"
+      public_addr = "18.118.142.30:30922"
+      controllers = [ "10.203.146.97" ]
+      tags {
+        type = "k8s"
+      }
+    }
+
+    kms "aead" {
+      purpose = "worker-auth"
+      aead_type = "aes-gcm"
+      key = "8fZBjCUfN0TzjEGLQldGY4+iE9AkOvCfjh7+p0GtRBQ="
+      key_id = "global_worker-auth"
+    }
