@@ -62,9 +62,9 @@ rm -f external-counter.json
 
 rm boundary*.json
 
-kubectl config delete-context $(kubectl config get-contexts | grep cluster-1-gke | awk '{print $1}' | head -n 1)
+kubectl config delete-context $(kubectl config get-contexts -o name | grep cluster-1-gke | awk '{print $1}' | head -n 1)
 # kubectl config delete-user $(kubectl config get-users | grep cluster-1-gke | awk '{print $1}' | head -n 1)
 # kubectl config delete-cluster $(kubectl config get-clusters | grep cluster-1-gke | awk '{print $1}' | head -n 1)
-kubectl config delete-context $(kubectl config get-contexts | grep cluster-2-gke | awk '{print $1}' | head -n 1)
+kubectl config delete-context $(kubectl config get-contexts -o name | grep cluster-2-gke | awk '{print $1}' | head -n 1)
 # kubectl config delete-user $(kubectl config get-users | grep cluster-2-gke | awk '{print $1}' | head -n 1)
 # kubectl config delete-cluster $(kubectl config get-clusters | grep cluster-2-gke | awk '{print $1}' | head -n 1)
