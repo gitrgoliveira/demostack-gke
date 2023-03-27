@@ -19,7 +19,7 @@ global:
     httpsOnly: false
     enableAutoEncrypt: true
     verify: false
-    serverAdditionalDNSSANs: ["consul-cluster-2.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"]
+    serverAdditionalDNSSANs: ["consul-cluster-2.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"]
   acls:
     manageSystemACLs: true
   metrics:
@@ -89,7 +89,7 @@ ui:
   service:
     type: LoadBalancer
     annotations: |
-      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-2.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com."
+      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-2.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com."
 meshGateway:
   enabled: true
   wanAddress:
@@ -108,14 +108,14 @@ ingressGateways:
     - name: dashboard-ingress-gateway
       service:
         annotations: |
-          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-2.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"
+          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-2.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"
     - name: webapp-cluster-2-ig
       service:
         annotations: |
-          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-2.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"
+          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-2.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"
 
 terminatingGateways:
   enabled: false
 
 prometheus:
-  enabled: true
+  enabled: false

@@ -1,6 +1,7 @@
 global:
   name: consul
   image: hashicorp/consul-enterprise:1.14-ent
+  logLevel: "debug"
   datacenter: cluster-1
   peering:
     enabled: true
@@ -19,12 +20,12 @@ global:
     httpsOnly: false
     enableAutoEncrypt: true
     verify: false
-    serverAdditionalDNSSANs: ["consul-cluster-1.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"]
+    serverAdditionalDNSSANs: ["consul-cluster-1.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"]
   acls:
     manageSystemACLs: true
-  metrics:
-    enabled: true
-    enableAgentMetrics: true
+  # metrics:
+    # enabled: true
+    # enableAgentMetrics: true
 
 server:
   replicas: 3
@@ -67,12 +68,12 @@ connectInject:
     defaultEnabled: true
   cni:
     enabled: true
-    logLevel: info
+    logLevel: debug
     cniBinDir: "/home/kubernetes/bin"
     cniNetDir: "/etc/cni/net.d"
-  metrics:
-    defaultEnabled: true
-    defaultEnableMerging: true
+  # metrics:
+  #   defaultEnabled: true
+  #   defaultEnableMerging: true
   consulNamespaces:
     mirroringK8S: true
 
@@ -90,7 +91,7 @@ ui:
   service:
     type: LoadBalancer
     annotations: |
-      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-1.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"
+      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-1.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"
 meshGateway:
   enabled: true
   wanAddress:
@@ -111,13 +112,13 @@ ingressGateways:
         annotations: |
           prometheus.io/scrape: "true"
           prometheus.io/port: "9102"
-          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-1.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"
+          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-1.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"
     - name: webapp-cluster-1-ig
       service:
         annotations: |
           prometheus.io/scrape: "true"
           prometheus.io/port: "9102"
-          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-1.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com"
+          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-1.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"
 
 # terminatingGateways:
 #   enabled: true
@@ -125,4 +126,4 @@ ingressGateways:
 #     - name: google-terminating-gateway
 
 prometheus:
-  enabled: true
+  enabled: false
