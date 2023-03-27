@@ -1,53 +1,42 @@
 global:
   name: consul
-  image: hashicorp/consul-enterprise:1.10.3-ent
+  image: hashicorp/consul-enterprise:1.14-ent
   datacenter: cluster-2
+  peering:
+    enabled: true
+  adminPartitions:
+    enabled: true
   enableConsulNamespaces: true
+  enterpriseLicense:
+    secretName: "consul-license"
+    secretKey: "license"
   gossipEncryption:
+    autoGenerate: false
     secretName: consul-gossipencryptionkey
     secretKey: key
-  federation:
-    enabled: true
   tls:
     enabled: true
     httpsOnly: false
     enableAutoEncrypt: true
     verify: false
-    serverAdditionalDNSSANs: ["consul-cluster-2.ric.gcp.hashidemos.io"]
-    caCert:
-      secretName: consul-federation
-      secretKey: caCert
-    caKey:
-      secretName: consul-federation
-      secretKey: caKey
+    serverAdditionalDNSSANs: ["consul-cluster-2.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"]
   acls:
     manageSystemACLs: true
-    replicationToken:
-      secretName: consul-acl-replication-acl-token
-      secretKey: token
   metrics:
     enabled: true
     enableAgentMetrics: true
+
 server:
-  enterpriseLicense:
-    # The name of the Kubernetes secret that holds the enterprise license.
-    # The secret must be in the same namespace that Consul is installed into.
-    secretName: "consul-license"
-    # The key within the Kubernetes secret that holds the enterprise license.
-    secretKey: "license"
-  extraVolumes:
-  - type: secret
-    name: consul-federation
-    items:
-      - key: serverConfigJSON
-        path: config.json
-    load: true
+  replicas: 3
+  resources:
+    requests:
+      memory: "16Gi"
+      cpu: "4.0"
+    limits:
+      memory: "32Gi"
+      cpu: "8.0"
   extraConfig: |
     {
-      "telemetry": {
-        "prometheus_retention_time": "10s",
-        "disable_hostname": true
-      },
       "log_level": "INFO",
       "dns_config": {
         "service_ttl": {
@@ -73,41 +62,34 @@ server:
 
 connectInject:
   enabled: true
+  transparentProxy:
+    defaultEnabled: true
+  cni:
+    enabled: true
+    logLevel: info
+    cniBinDir: "/home/kubernetes/bin"
+    cniNetDir: "/etc/cni/net.d"
   metrics:
     defaultEnabled: true
     defaultEnableMerging: true
-
   consulNamespaces:
     mirroringK8S: true
-  # centralConfig:
-  #   enabled: true
-  #   defaultProtocol: 'http'
-  #   proxyDefaults: |
-  #     {
-  #       "envoy_prometheus_bind_addr": "0.0.0.0:9102",
-  #       "envoy_extra_static_clusters_json": "{\"connect_timeout\": \"3.000s\", \"dns_lookup_family\": \"V4_ONLY\", \"lb_policy\": \"ROUND_ROBIN\", \"load_assignment\": { \"cluster_name\": \"zipkin\", \"endpoints\": [ { \"lb_endpoints\": [ { \"endpoint\": { \"address\": { \"socket_address\": { \"address\": \"zipkin.default\", \"port_value\": 9411, \"protocol\": \"TCP\" } } } } ] } ] }, \"name\": \"zipkin\", \"type\": \"STRICT_DNS\" }",
-  #       "envoy_tracing_json":"{ \"http\": { \"config\": { \"collector_cluster\": \"zipkin\", \"collector_endpoint\": \"/api/v2/spans\"}, \"name\": \"envoy.tracers.zipkin\" }}"
-  #     }
 
 syncCatalog:
   enabled: true
   toConsul: true
   toK8S: false
   default: true
-  addK8SNamespaceSuffix: false
+  addK8SNamespaceSuffix: "c2-"
   consulNamespaces:
     mirroringK8S: true
-  aclSyncToken:
-    secretName: consul-catalog-sync-acl-token
-    secretKey: token
+    mirroringK8SPrefix: "c2-"
 
-controller:
-  enabled: true
 ui:
   service:
     type: LoadBalancer
     annotations: |
-      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-2.ric.gcp.hashidemos.io."
+      "external-dns.alpha.kubernetes.io/hostname": "consul-cluster-2.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com."
 meshGateway:
   enabled: true
   wanAddress:
@@ -121,16 +103,19 @@ ingressGateways:
     service:
       type: LoadBalancer
       ports:
-        - port: 443
+        - port: 8443
   gateways:
     - name: dashboard-ingress-gateway
       service:
         annotations: |
-          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-2.ric.gcp.hashidemos.io"
+          external-dns.alpha.kubernetes.io/hostname: "dashboard-cluster-2.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"
     - name: webapp-cluster-2-ig
       service:
         annotations: |
-          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-2.ric.gcp.hashidemos.io"
+          external-dns.alpha.kubernetes.io/hostname: "webapp-cluster-2.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com"
 
 terminatingGateways:
+  enabled: false
+
+prometheus:
   enabled: false

@@ -63,7 +63,7 @@ kind: Service
 metadata:
   annotations:
     consul.hashicorp.com/service-sync: "true"
-    external-dns.alpha.kubernetes.io/hostname: jaeger-2.ric.gcp.hashidemos.io
+    external-dns.alpha.kubernetes.io/hostname: jaeger-2.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com
   name: jaeger
   labels:
     app: jaeger

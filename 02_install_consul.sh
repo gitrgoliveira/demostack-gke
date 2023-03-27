@@ -8,7 +8,7 @@ if [ ! -s gossipEncryptionKey ]; then
 fi
 LICENSE_PATH=$HOME/licenses/consul_v2lic.hclic
 
-CONSUL_HELM_VERSION=0.33.0
+CONSUL_HELM_VERSION=1.1.0
 helm repo add hashicorp https://helm.releases.hashicorp.com
 helm repo update
 
@@ -30,8 +30,6 @@ helm install consul hashicorp/consul -f values1_consul.yaml \
 fi
 kubectl wait --for=condition=available --timeout=5m deployment.apps/consul-mesh-gateway
 
-kubectl get secret consul-federation -o yaml > consul-federation-secret.yaml
-kubectl get secrets consul-acl-replication-acl-token -o yaml > consul-acl-replication-acl-token.yaml
 echo ".: waiting for Cluster-1 IP address"
 while ! kubectl get svc consul-ui -o jsonpath={..ip} --allow-missing-template-keys=false 2>/dev/null; do
     sleep 5
@@ -49,11 +47,6 @@ helm upgrade consul hashicorp/consul -f values2_consul.yaml \
     --version $CONSUL_HELM_VERSION \
     --wait
 else
-kubectl delete -f consul-federation-secret.yaml
-kubectl apply -f consul-federation-secret.yaml
-kubectl delete -f consul-acl-replication-acl-token.yaml
-kubectl apply -f consul-acl-replication-acl-token.yaml
-
 helm install consul hashicorp/consul -f values2_consul.yaml \
     --set global.datacenter=cluster-2 \
     --version $CONSUL_HELM_VERSION \
@@ -67,6 +60,8 @@ done
 echo ""
 
 setup-consul 2>&1 1>/dev/null
+
+consul acl policy update -name "anonymous-token-policy" -rules @consul_config/anonymous-policy.hcl
 
 detect_endpoints;
 c1_kctx;

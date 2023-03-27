@@ -78,7 +78,7 @@ boundary targets add-host-sets -id=$TARGET_ID -host-set=$HOST_SET_ID
 # --- demo ---
 # kubectl config set-cluster gke_rgoliveira-boundary --certificate-authority=./cluster-1-ca.pem
 
-# export BOUNDARY_ADDR=http://boundary-api.ric.gcp.hashidemos.io:9200/
+# export BOUNDARY_ADDR=http://boundary-api.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com:9200/
 # export PROJECT_ID=$(boundary scopes list -recursive -format json | jq  -r '.items[] | select(.name | contains("Generated project scope")) | .id')
 
 # AUTH_METHOD_ID=$(cat boundary_login.json | jq -r .auth_method.auth_method_id) &&

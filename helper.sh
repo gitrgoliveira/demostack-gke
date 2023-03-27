@@ -55,7 +55,8 @@ function detect_endpoints {
     c2_kctx 2>&1 1>/dev/null
     echo $(kubectl get svc -o jsonpath={..annotations.'external-dns\.alpha\.kubernetes\.io\/hostname'}) | tr ' ' '\n' | uniq
     echo "================================================================"
-    echo "Token: $(c1_kctl get secrets  consul-bootstrap-acl-token -o jsonpath={..token} | base64 -D)"
+    echo "dc1 Consul: $(c1_kctl get secrets  consul-bootstrap-acl-token -o jsonpath={..token} | base64 -D)"
+    echo "dc2 Consul: $(c2_kctl get secrets  consul-bootstrap-acl-token -o jsonpath={..token} | base64 -D)"
     echo "================================================================"
     echo ""
 }

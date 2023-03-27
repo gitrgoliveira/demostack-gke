@@ -26,12 +26,10 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
+        consul.hashicorp.com/enable-metrics-merging: "false"
         consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/transparent-proxy: "true"
         consul.hashicorp.com/connect-service: "dashboard-service"
-        # consul.hashicorp.com/connect-service-upstreams: "prepared_query:local-counter:9001"
-        consul.hashicorp.com/connect-service-upstreams: "local-counter.default:9001:cluster-2"
-        # consul.hashicorp.com/connect-service-upstreams: "external-counting.default:9001:cluster-1"
-        # consul.hashicorp.com/connect-service-protocol: "tcp"
         consul.hashicorp.com/service-tags: "v2"
       labels:
         app: dashboard-service
@@ -45,7 +43,7 @@ spec:
           name: http
         env:
         - name: COUNTING_SERVICE_URL
-          value: "http://localhost:9001"
+          value: "http://local-counter.virtual.consul:9001"
 ---
 apiVersion: v1
 kind: Service
@@ -67,5 +65,38 @@ apiVersion: consul.hashicorp.com/v1alpha1
 kind: ServiceDefaults
 metadata:
   name: dashboard-service
+  namespace: dashboard-service
 spec:
-  protocol: 'http'
+  protocol: tcp
+  transparentProxy:
+    dialedDirectly: false
+
+---
+
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: IngressGateway
+metadata:
+  name: dashboard-ingress-gateway
+spec:
+  tls:
+    enabled: true
+  listeners:
+    - port: 8443
+      protocol: tcp
+      services:
+        - name: dashboard-service
+          namespace: dashboard-service
+          
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: dashboard-service-ingress
+spec:
+  destination:
+    name: dashboard-service
+    namespace: dashboard-service
+  sources:
+    - name: dashboard-ingress-gateway
+      namespace: default
+      action: allow

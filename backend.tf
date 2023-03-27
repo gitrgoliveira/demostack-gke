@@ -1,7 +1,7 @@
 terraform {
   backend "remote" {
     hostname     = "app.terraform.io"
-    organization = "emea-se-playground-2019"
+    organization = "hc-ric-demo"
 
     workspaces {
       name = "ricardo-gcp-demostack"

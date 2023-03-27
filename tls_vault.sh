@@ -28,7 +28,7 @@ DNS.2 = ${SERVICE}.${NAMESPACE}
 DNS.3 = ${SERVICE}.${NAMESPACE}.svc
 DNS.4 = ${SERVICE}.${NAMESPACE}.svc.cluster.local
 DNS.5 = *.vault-internal
-DNS.5 = *.ric.gcp.hashidemos.io
+DNS.5 = *.hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com
 DNS.6 = vault-0
 DNS.7 = vault-1
 DNS.8 = vault-2
@@ -39,6 +39,53 @@ IP.1 = 127.0.0.1
 EOF
 
 openssl req -new -key ${TMPDIR}/vault.key -subj "/CN=${SERVICE}.${NAMESPACE}.svc" -out ${TMPDIR}/server.csr -config ${TMPDIR}/csr.conf
+cat <<EOF >${TMPDIR}/csr-approver.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: csr-approver
+rules:
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests/approval
+  verbs:
+  - update
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - signers
+  resourceNames:
+  - example.com/my-signer-name # example.com/* can be used to authorize for all signers in the 'example.com' domain
+  verbs:
+  - approve
+EOF
+kubectl create -f ${TMPDIR}/csr-approver.yaml || true
+
+GCLOUD_ACCOUNT=$(gcloud auth list --filter=status:ACTIVE --format="value(account)")
+cat <<EOF >${TMPDIR}/crb.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csr-approver
+subjects:
+# Google Cloud user account
+- kind: User
+  name: $GCLOUD_ACCOUNT
+roleRef:
+  kind: ClusterRole
+  name: csr-approver
+  apiGroup: rbac.authorization.k8s.io
+EOF
+kubectl create -f ${TMPDIR}/crb.yaml || true
 
 export CSR_NAME=vault-csr
 cat <<EOF >${TMPDIR}/csr.yaml
@@ -47,7 +94,7 @@ kind: CertificateSigningRequest
 metadata:
   name: ${CSR_NAME}
 spec:
-  signerName: kubernetes.io/kubelet-serving
+  signerName: kubernetes.io/kube-apiserver-client
   groups:
   - system:authenticated
   request: $(cat ${TMPDIR}/server.csr | base64 | tr -d '\n')
@@ -55,15 +102,19 @@ spec:
   - digital signature
   - key encipherment
   - server auth
+  - client auth
 EOF
 kubectl create -f ${TMPDIR}/csr.yaml || true
 kubectl certificate approve ${CSR_NAME}
+# wait just 5 seconds for the certificate to be generated 
+sleep 5 
 serverCert=$(kubectl get csr ${CSR_NAME} -o jsonpath='{.status.certificate}')
 
 echo "${serverCert}" | openssl base64 -d -A -out ${TMPDIR}/vault.crt
 
 kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}' | base64 -D > ${TMPDIR}/vault.ca
 
+# kubectl delete secret ${SECRET_NAME} || true
 kubectl create secret generic ${SECRET_NAME} \
     --namespace ${NAMESPACE} \
     --from-file=vault.key=${TMPDIR}/vault.key \

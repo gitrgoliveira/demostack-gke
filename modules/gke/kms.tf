@@ -15,6 +15,9 @@ resource "google_service_account" "vault_kms_service_account" {
 
 # Create a KMS key ring
 resource "google_kms_key_ring" "key_ring" {
+  depends_on = [
+    google_project_service.gcp_services
+  ]
   project  = var.project
   name     = local.key_ring
   location = local.keyring_location
@@ -23,7 +26,7 @@ resource "google_kms_key_ring" "key_ring" {
 # Create a crypto key for the key ring
 resource "google_kms_crypto_key" "crypto_key" {
   name            = local.crypto_key
-  key_ring        = google_kms_key_ring.key_ring.self_link
+  key_ring        = google_kms_key_ring.key_ring.id
   rotation_period = "100000s"
 }
 
@@ -63,3 +66,19 @@ resource "google_project_iam_member" "storageviewer" {
   role    = "roles/storage.objectViewer"
 }
 
+resource "google_project_iam_member" "kmsadmin" {
+  project = var.project
+  member  = "serviceAccount:${google_service_account.vault_kms_service_account.email}"
+  role    = "roles/cloudkms.admin"
+}
+resource "google_project_iam_member" "cryptoKeyEncrypterDecrypter" {
+  project = var.project
+  member  = "serviceAccount:${google_service_account.vault_kms_service_account.email}"
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+}
+
+resource "google_project_iam_member" "signerVerifier" {
+  project = var.project
+  member  = "serviceAccount:${google_service_account.vault_kms_service_account.email}"
+  role    = "roles/cloudkms.signerVerifier"
+}
