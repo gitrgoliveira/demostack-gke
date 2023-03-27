@@ -1,13 +1,13 @@
 #! /bin/bash
 # set -eu
 # set -o pipefail
-GCP_PROJECT_ID=$(terraform output -json project | jq -r)
+export GCP_PROJECT_ID=$(terraform output -json project | jq -r)
 
 gcloud config set project $GCP_PROJECT_ID
 gcloud components install gke-gcloud-auth-plugin
 
 DNS_ZONE=$GCP_PROJECT_ID.gcp.sbx.hashicorpdemo.com
-old_string=hc-7b910e3ece0c4fa386d0665927c.gcp.sbx.hashicorpdemo.com
+old_string=hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com
 # mac version of sed
 find . -type f -name "*.yaml" -exec sed -i '' -e "s/$old_string/$DNS_ZONE/g" {} +
 find . -type f -name "*.hcl" -exec sed -i '' -e "s/$old_string/$DNS_ZONE/g" {} +
