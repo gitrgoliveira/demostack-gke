@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: nginx
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: nginx.ric.gcp.hashidemos.io.
+    external-dns.alpha.kubernetes.io/hostname: nginx.hc-4eaeab05d358430fb89d3ae6329.gcp.sbx.hashicorpdemo.com.
 spec:
   type: LoadBalancer
   ports:
